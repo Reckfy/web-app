@@ -1,21 +1,27 @@
 Инструкция по запуску веб приложения на сервере:
 
-    На новом созданном сервере нужно выполнить действия (В примере команды для Ubuntu)
-        sudo apt update
-        sudo apt upgrade
-        sudo apt install openssh-server
-        sudo systemctl start ssh -запускаем службу ssh
-        sudo systemctl enable ssh -включаем автозапуск службы
-        ip addr -узнаем ip-адрес сервера
+На новом созданном сервере нужно выполнить действия (в примере команды для Ubuntu):
+    sudo apt update
+    sudo apt upgrade
+    sudo apt install openssh-server
 
-    На клиенте с проектом:
-        ssh <userserver>@<ipserver> -необязательно, проверка возможности подключения к серверу
-        ssh-copy-id <userserver>@<ipserver> -копируем ssh на сервер
+Запускаем службу ssh:
+    sudo systemctl start ssh 
+Включаем автозапуск службы ssh:
+    sudo systemctl enable ssh 
+Узнаем ip-адрес сервера:
+    ip addr 
 
-        В файле inventory.ini вносим изменения для нашего сервера 
+На клиенте с проектом:
+Необязательно, проверка возможности подключения к серверу:
+    ssh <userserver>@<ipserver> 
+Копируем ssh-ключ на сервер:
+    ssh-copy-id <userserver>@<ipserver> 
 
-        В папке с Плейбуком (web-app/ansible) запускаем команду: 
-            ansible-playbook -i inventory.ini playbook.yml
+В файле inventory.ini вносим изменения для нашего сервера 
 
-    Теперь идем в браузер и подключаемся по ip сервера, проверяем работу
+В папке с Плейбуком (web-app/ansible) запускаем команду: 
+    ansible-playbook -i inventory.ini playbook.yml
+
+Теперь идем в браузер и подключаемся по ip сервера, проверяем работу
 
