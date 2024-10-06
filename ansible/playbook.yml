@@ -1,0 +1,96 @@
+---
+- hosts: webservers
+  become: true
+
+  tasks:
+    - name: Install packages Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Create necessary directories
+      file:
+        path: /home/app/nginx
+        state: directory
+        mode: '0755'        
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Verify Docker Compose installation
+      command: docker-compose --version
+      register: result
+
+    - name: Check docker service is started
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create app directory
+      file:
+        path: /home/app
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy Dockerfile
+      copy:
+        src: files/Dockerfile
+        dest: /home/app/Dockerfile
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Copy docker-compose.yml to server
+      copy:
+        src: files/docker-compose.yml
+        dest: /home/app/docker-compose.yml
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Copy PHP app to server
+      copy:
+        src: files/app/
+        dest: /home/app/web/
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Deploy Nginx configuration from temp
+      template:
+        src: templates/nginx.conf.j2
+        dest: /home/app/nginx/nginx.conf
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Run Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /home/app/
